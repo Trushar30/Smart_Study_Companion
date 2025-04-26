@@ -111,12 +111,39 @@ const NotesGenerator = () => {
                 <SelectValue placeholder="Select a topic" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="Array & String">Array & String</SelectItem>
-                <SelectItem value="Stack & Queue">Stack & Queue</SelectItem>
-                <SelectItem value="Linked List">Linked List</SelectItem>
-                <SelectItem value="Tree & Graph">Tree & Graph</SelectItem>
-                <SelectItem value="Sorting">Sorting</SelectItem>
-                <SelectItem value="Dynamic Programming">Dynamic Programming</SelectItem>
+                {/* Get topics from study plan if available */}
+                {(() => {
+                  try {
+                    const studyPlanStr = localStorage.getItem('studyPlan');
+                    if (studyPlanStr) {
+                      const studyPlan = JSON.parse(studyPlanStr);
+                      // Filter out break topics and create select items
+                      const topics = studyPlan.topics
+                        .filter((t: any) => !t.isBreak)
+                        .map((t: any, i: number) => (
+                          <SelectItem key={i} value={t.name}>{t.name}</SelectItem>
+                        ));
+                      
+                      if (topics.length > 0) {
+                        return topics;
+                      }
+                    }
+                  } catch (error) {
+                    console.error("Error loading study plan topics:", error);
+                  }
+                  
+                  // Fallback topics if study plan isn't available
+                  return (
+                    <>
+                      <SelectItem value="Array & String">Array & String</SelectItem>
+                      <SelectItem value="Stack & Queue">Stack & Queue</SelectItem>
+                      <SelectItem value="Linked List">Linked List</SelectItem>
+                      <SelectItem value="Tree & Graph">Tree & Graph</SelectItem>
+                      <SelectItem value="Sorting">Sorting</SelectItem>
+                      <SelectItem value="Dynamic Programming">Dynamic Programming</SelectItem>
+                    </>
+                  );
+                })()}
               </SelectContent>
             </Select>
           </div>

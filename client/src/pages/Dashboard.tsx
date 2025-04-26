@@ -27,12 +27,95 @@ import {
 const Dashboard = () => {
   const [location, navigate] = useLocation();
   const { studyPlan, hasStudyPlan, markTopicCompleted, getTopicStatus } = useStudyPlan();
+  // State for the timer
+  const [countdownDays, setCountdownDays] = useState(0);
+  const [countdownHours, setCountdownHours] = useState(0);
+  const [countdownMinutes, setCountdownMinutes] = useState(0);
+  const [countdownSeconds, setCountdownSeconds] = useState(0);
 
   useEffect(() => {
     if (!hasStudyPlan()) {
       navigate("/study-plan-generator");
     }
   }, [hasStudyPlan, navigate]);
+
+  // Add a real-time countdown effect
+  useEffect(() => {
+    if (!studyPlan) return;
+    
+    // Parse exam date function
+    const parseExamDate = (dateString: string) => {
+      // Parse a date string like "27/04/2025 12:00 PM"
+      if (!dateString) return new Date();
+      
+      try {
+        const [datePart, timePart] = dateString.split(' ');
+        const [day, month, year] = datePart.split('/').map(num => parseInt(num, 10));
+        
+        let [hourMinute, amPm] = ['12:00', 'AM']; // Default values
+        
+        if (timePart) {
+          if (timePart.includes('AM') || timePart.includes('PM')) {
+            const amPmSplit = timePart.split(' ');
+            hourMinute = amPmSplit[0];
+            amPm = amPmSplit[1];
+          } else {
+            hourMinute = timePart;
+          }
+        }
+        
+        const [hour, minute] = hourMinute.split(':').map(num => parseInt(num, 10));
+        
+        // Create a date object with the parsed values
+        const date = new Date(year, month - 1, day);
+        
+        // Add the time
+        let hourValue = hour;
+        // Convert to 24-hour format if PM
+        if (amPm === 'PM' && hour < 12) {
+          hourValue += 12;
+        } else if (amPm === 'AM' && hour === 12) {
+          hourValue = 0;
+        }
+        
+        date.setHours(hourValue, minute || 0);
+        return date;
+      } catch (error) {
+        console.error("Error parsing exam date:", error);
+        return new Date(); // Return current date as fallback
+      }
+    };
+
+    // Update timer function
+    const updateTimer = () => {
+      const examDate = parseExamDate(studyPlan.examDate);
+      const now = new Date();
+      const timeRemaining = examDate.getTime() - now.getTime();
+      
+      if (timeRemaining <= 0) {
+        // Exam date has passed
+        setCountdownDays(0);
+        setCountdownHours(0);
+        setCountdownMinutes(0);
+        setCountdownSeconds(0);
+        return;
+      }
+      
+      setCountdownDays(Math.floor(timeRemaining / (1000 * 60 * 60 * 24)));
+      setCountdownHours(Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)));
+      setCountdownMinutes(Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60)));
+      setCountdownSeconds(Math.floor((timeRemaining % (1000 * 60)) / 1000));
+    };
+
+    // Initial update
+    updateTimer();
+    
+    // Set interval to update every second
+    const interval = setInterval(updateTimer, 1000);
+    
+    // Cleanup
+    return () => clearInterval(interval);
+  }, [studyPlan]);
 
   if (!hasStudyPlan()) {
     return null;
@@ -51,19 +134,47 @@ const Dashboard = () => {
       target: 100
     })) || [];
 
-  // Load real quiz data from localStorage
+  // Load real quiz data from localStorage, tracking progress per topic
   const loadQuizData = () => {
     try {
       const savedResults = localStorage.getItem('quizResults');
       if (savedResults) {
         const results = JSON.parse(savedResults);
-        // Get the 5 most recent quiz results
-        return results
-          .slice(-5)
-          .map((result: any, index: number) => ({
-            name: `Quiz ${index + 1}`,
-            score: Math.round((result.score / result.totalQuestions) * 100)
-          }));
+        
+        // Create a map to track attempts per topic
+        const topicAttempts: {[key: string]: any[]} = {};
+        
+        // Group quiz attempts by topic
+        results.forEach((result: any) => {
+          if (!topicAttempts[result.topic]) {
+            topicAttempts[result.topic] = [];
+          }
+          topicAttempts[result.topic].push({
+            score: Math.round((result.score / result.totalQuestions) * 100),
+            timestamp: result.timestamp
+          });
+        });
+        
+        // Format data for chart - show multiple attempts for the same topics
+        // This shows how score improved between attempts
+        const chartData: any[] = [];
+        
+        Object.entries(topicAttempts).forEach(([topic, attempts]) => {
+          // Sort attempts by timestamp
+          attempts.sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime());
+          
+          // Add each attempt as a point on the chart, showing progression
+          attempts.forEach((attempt, index) => {
+            const displayName = topic.length > 10 ? topic.substring(0, 10) + '...' : topic;
+            chartData.push({
+              name: `${displayName} #${index + 1}`,
+              score: attempt.score
+            });
+          });
+        });
+        
+        // Return the most recent 5 entries
+        return chartData.slice(-5);
       }
     } catch (error) {
       console.error("Error loading quiz results:", error);
@@ -75,8 +186,8 @@ const Dashboard = () => {
           .filter((topic, index) => !topic.isBreak && getTopicStatus(index))
           .slice(0, 5)
           .map((topic, i) => ({
-            name: `Topic ${i + 1}`,
-            score: 100 // Complete score for completed topics
+            name: topic.name.length > 8 ? topic.name.substring(0, 8) + '...' : topic.name,
+            score: 75 // Default score (75%) for completed topics as placeholder
           }))
       : [];
   };
@@ -139,59 +250,6 @@ const Dashboard = () => {
   
   const topicsRadarData = loadTopicsRadarData();
 
-  // Calculate remaining time for exam
-  const parseExamDate = (dateString: string) => {
-    // Parse a date string like "27/04/2025 12:00 PM"
-    if (!dateString) return new Date();
-    
-    try {
-      const [datePart, timePart] = dateString.split(' ');
-      const [day, month, year] = datePart.split('/').map(num => parseInt(num, 10));
-      
-      let [hourMinute, amPm] = ['12:00', 'AM']; // Default values
-      
-      if (timePart) {
-        if (timePart.includes('AM') || timePart.includes('PM')) {
-          const amPmSplit = timePart.split(' ');
-          hourMinute = amPmSplit[0];
-          amPm = amPmSplit[1];
-        } else {
-          hourMinute = timePart;
-        }
-      }
-      
-      const [hour, minute] = hourMinute.split(':').map(num => parseInt(num, 10));
-      
-      // Create a date object with the parsed values
-      const date = new Date(year, month - 1, day);
-      
-      // Add the time
-      let hourValue = hour;
-      // Convert to 24-hour format if PM
-      if (amPm === 'PM' && hour < 12) {
-        hourValue += 12;
-      } else if (amPm === 'AM' && hour === 12) {
-        hourValue = 0;
-      }
-      
-      date.setHours(hourValue, minute || 0);
-      return date;
-    } catch (error) {
-      console.error("Error parsing exam date:", error);
-      return new Date(); // Return current date as fallback
-    }
-  };
-
-  // Parse the exam date and calculate time remaining
-  const examDate = studyPlan ? parseExamDate(studyPlan.examDate) : new Date();
-  const now = new Date();
-  const timeRemaining = examDate.getTime() - now.getTime();
-  
-  const days = Math.floor(timeRemaining / (1000 * 60 * 60 * 24));
-  const hours = Math.floor((timeRemaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-  const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
-  const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
-
   // Calculate overall progress percentage
   const progressPercentage = Math.round((completedTopicsCount / nonBreakTopicsCount) * 100);
 
@@ -229,16 +287,16 @@ const Dashboard = () => {
           <p className="text-muted-foreground mb-2">TIME REMAINING:</p>
           <div className="flex space-x-3 mt-2">
             <div className="countdown-box">
-              <span className="text-xl font-bold">{days < 10 ? `0${days}` : days}</span>
+              <span className="text-xl font-bold">{countdownDays < 10 ? `0${countdownDays}` : countdownDays}</span>
             </div>
             <div className="countdown-box">
-              <span className="text-xl font-bold">{hours < 10 ? `0${hours}` : hours}</span>
+              <span className="text-xl font-bold">{countdownHours < 10 ? `0${countdownHours}` : countdownHours}</span>
             </div>
             <div className="countdown-box">
-              <span className="text-xl font-bold">{minutes < 10 ? `0${minutes}` : minutes}</span>
+              <span className="text-xl font-bold">{countdownMinutes < 10 ? `0${countdownMinutes}` : countdownMinutes}</span>
             </div>
             <div className="countdown-box">
-              <span className="text-xl font-bold">{seconds < 10 ? `0${seconds}` : seconds}</span>
+              <span className="text-xl font-bold">{countdownSeconds < 10 ? `0${countdownSeconds}` : countdownSeconds}</span>
             </div>
           </div>
           <div className="flex justify-between text-muted-foreground text-sm mt-1">
@@ -320,16 +378,18 @@ const Dashboard = () => {
             >
               {topic.isBreak ? (
                 <>
-                  <div className="timeline-dot bg-gray-500">
-                    <i className="fas fa-coffee text-xs"></i>
+                  <div className="timeline-dot bg-gray-500 flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
+                    </svg>
                   </div>
                   <div className="flex justify-between items-center">
                     <h4 className="font-medium text-muted-foreground">Break</h4>
                     <div className="flex items-center space-x-4">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground min-w-[80px] text-right">
                         {topic.duration} minutes
                       </span>
-                      <div className={getTopicStatus(index) ? "study-done" : "study-pending"}>
+                      <div className={`${getTopicStatus(index) ? "study-done" : "study-pending"} w-6 h-6 flex items-center justify-center rounded-sm`}>
                         {getTopicStatus(index) && <Check className="h-3 w-3" />}
                       </div>
                     </div>
@@ -337,19 +397,19 @@ const Dashboard = () => {
                 </>
               ) : (
                 <>
-                  <div className="timeline-dot">
-                    {index + 1}
+                  <div className="timeline-dot flex items-center justify-center">
+                    <span className="text-xs text-white font-medium">{index + 1}</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <h4 className="font-medium text-primary">{topic.name}</h4>
+                    <h4 className="font-medium text-primary mr-4 max-w-[60%]">{topic.name}</h4>
                     <div className="flex items-center space-x-4">
-                      <span className="text-sm text-muted-foreground">
+                      <span className="text-sm text-muted-foreground min-w-[80px] text-right">
                         {topic.duration} minutes
                       </span>
                       <Button 
                         variant="outline" 
-                        size="icon" 
-                        className={getTopicStatus(index) ? "study-done" : "study-pending"}
+                        size="icon"
+                        className={`${getTopicStatus(index) ? "study-done" : "study-pending"} w-6 h-6 p-0 flex items-center justify-center rounded-sm`}
                         onClick={() => markTopicCompleted(index)}
                       >
                         {getTopicStatus(index) && <Check className="h-3 w-3" />}
