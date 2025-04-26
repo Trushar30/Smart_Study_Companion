@@ -86,19 +86,19 @@
 
 /* Custom Classes */
 .timeline-line {
-  @apply absolute left-5 top-0 bottom-0 w-0.5 bg-primary;
+  @apply absolute left-5 top-0 bottom-0 w-0.5 bg-primary opacity-50;
 }
 
 .timeline-dot {
-  @apply absolute left-2.5 -translate-x-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-sm font-bold;
+  @apply absolute left-2.5 -translate-x-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-sm font-bold shadow-sm;
 }
 
 .countdown-box {
-  @apply w-[45px] h-[45px] flex items-center justify-center rounded-md bg-muted font-bold text-xl;
+  @apply w-[55px] h-[55px] flex items-center justify-center rounded-md bg-muted font-bold text-xl shadow-sm;
 }
 
 .quiz-option {
-  @apply flex items-start cursor-pointer;
+  @apply flex items-start cursor-pointer p-2 rounded-md hover:bg-muted/50 transition-colors;
 }
 
 .quiz-option-circle {
@@ -115,11 +115,11 @@
 }
 
 .study-done {
-  @apply w-5 h-5 rounded flex items-center justify-center bg-primary text-white;
+  @apply w-6 h-6 rounded-sm flex items-center justify-center bg-primary text-white shadow-sm;
 }
 
 .study-pending {
-  @apply w-5 h-5 rounded border-2 border-primary;
+  @apply w-6 h-6 rounded-sm border border-primary/50 hover:border-primary transition-colors;
 }
 
 /* Sidebar styles */
