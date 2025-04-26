@@ -86,11 +86,11 @@
 
 /* Custom Classes */
 .timeline-line {
-  @apply absolute left-5 top-0 bottom-0 w-0.5 bg-primary opacity-50 ml-2;
+  @apply absolute left-5 top-0 bottom-0 w-0.5 bg-primary opacity-50 ml-4;
 }
 
 .timeline-dot {
-  @apply absolute left-7 -translate-x-1/2 w-7 h-7 flex items-center justify-center rounded-full bg-primary text-white text-sm font-bold shadow-sm;
+  @apply absolute left-9 -translate-x-1/2 w-8 h-8 flex items-center justify-center rounded-full bg-primary text-white text-sm font-bold shadow-sm;
 }
 
 .countdown-box {
