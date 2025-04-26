@@ -1,0 +1,123 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 0 0% 94.1%;
+  --foreground: 0 0% 9.0%;
+  --muted: 0 0% 95.9%;
+  --muted-foreground: 0 0% 45.1%;
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 9.0%;
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 9.0%;
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --primary: 270 45% 41%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 260 37% 55%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 191 67% 57%;
+  --accent-foreground: 0 0% 9.0%;
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 270 45% 41%;
+  --radius: 0.5rem;
+  
+  /* Chart Colors */
+  --chart-1: 0 85% 60%;
+  --chart-2: 191 67% 57%;
+  --chart-3: 270 60% 70%;
+  --chart-4: 210 80% 60%;
+  --chart-5: 30 90% 60%;
+  
+  /* Sidebar Colors */
+  --sidebar-background: 0 0% 100%;
+  --sidebar-foreground: 0 0% 9.0%;
+  --sidebar-primary: 270 45% 41%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 260 50% 90%;
+  --sidebar-accent-foreground: 270 45% 41%;
+  --sidebar-border: 0 0% 89.8%;
+  --sidebar-ring: 270 45% 41%;
+}
+
+.dark {
+  --background: 222 47% 11%;
+  --foreground: 0 0% 98%;
+  --muted: 0 0% 15%;
+  --muted-foreground: 0 0% 63.9%;
+  --popover: 0 0% 9%;
+  --popover-foreground: 0 0% 98%;
+  --card: 222 47% 16%;
+  --card-foreground: 0 0% 98%;
+  --border: 0 0% 20%;
+  --input: 0 0% 20%;
+  --primary: 270 45% 41%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 260 37% 55%;
+  --secondary-foreground: 0 0% 98%;
+  --accent: 191 67% 57%;
+  --accent-foreground: 0 0% 9.0%;
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+  --ring: 270 45% 41%;
+  
+  /* Sidebar Colors */
+  --sidebar-background: 222 47% 16%;
+  --sidebar-foreground: 0 0% 98%;
+  --sidebar-primary: 270 45% 41%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 260 37% 20%;
+  --sidebar-accent-foreground: 0 0% 98%;
+  --sidebar-border: 0 0% 20%;
+  --sidebar-ring: 270 45% 41%;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply font-sans antialiased bg-background text-foreground;
+  }
+}
+
+/* Custom Classes */
+.timeline-line {
+  @apply absolute left-5 top-0 bottom-0 w-0.5 bg-primary;
+}
+
+.timeline-dot {
+  @apply absolute left-2.5 -translate-x-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-sm font-bold;
+}
+
+.countdown-box {
+  @apply w-[45px] h-[45px] flex items-center justify-center rounded-md bg-muted font-bold text-xl;
+}
+
+.quiz-option {
+  @apply flex items-start cursor-pointer;
+}
+
+.quiz-option-circle {
+  @apply border-2 border-primary rounded-full w-8 h-8 flex items-center justify-center mr-3 transition-colors;
+}
+
+/* Add hover effect */
+.quiz-option:hover .quiz-option-circle {
+  @apply bg-primary/10;
+}
+
+.quiz-option-circle.selected {
+  @apply bg-primary text-white;
+}
+
+.study-done {
+  @apply w-5 h-5 rounded flex items-center justify-center bg-primary text-white;
+}
+
+.study-pending {
+  @apply w-5 h-5 rounded border-2 border-primary;
+}
