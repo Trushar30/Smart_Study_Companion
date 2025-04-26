@@ -27,8 +27,7 @@ import {
 const Dashboard = () => {
   const [location, navigate] = useLocation();
   const { studyPlan, hasStudyPlan, markTopicCompleted, getTopicStatus } = useStudyPlan();
-  
-  // If no study plan exists, redirect to study plan generator
+
   useEffect(() => {
     if (!hasStudyPlan()) {
       navigate("/study-plan-generator");
@@ -39,27 +38,37 @@ const Dashboard = () => {
     return null;
   }
 
-  // Generate real data based on current study plan
+  // Extract data from current study plan
+  const completedTopicsCount = studyPlan?.topics.filter((_, index) => getTopicStatus(index)).length || 0;
+  const nonBreakTopicsCount = studyPlan?.topics.filter(topic => !topic.isBreak).length || 0;
+  
+  // Create progress data from actual topic completion status
   const progressData = studyPlan?.topics
     .filter(topic => !topic.isBreak)
-    .map(topic => ({
+    .map((topic, index) => ({
       name: topic.name.length > 10 ? topic.name.substring(0, 10) + '...' : topic.name,
-      progress: Math.random() * 100 // In a real app, this would come from actual progress tracking
+      progress: getTopicStatus(index) ? 100 : 0,
+      target: 100
     })) || [];
 
-  // Generate quiz data based on topics
-  const quizData = Array.from({ length: 5 }, (_, i) => ({
-    name: `Quiz ${i + 1}`,
-    score: Math.floor(Math.random() * 30) + 70 // Generate random scores between 70-100
-  }));
+  // Create quiz data based on completed topics (only show data if we have actual completed topics)
+  const quizData = completedTopicsCount > 0 
+    ? studyPlan?.topics
+        .filter((topic, index) => !topic.isBreak && getTopicStatus(index))
+        .slice(0, 5)
+        .map((topic, i) => ({
+          name: `Topic ${i + 1}`,
+          score: 100 // Complete score for completed topics
+        }))
+    : [];
   
-  // Generate radar data for topic coverage
+  // Create radar data based on actual topic completion
   const topicsRadarData = studyPlan?.topics
     .filter(topic => !topic.isBreak)
     .slice(0, 6) // Take at most 6 topics for the radar chart
-    .map(topic => ({
+    .map((topic, index) => ({
       subject: topic.name.length > 8 ? topic.name.substring(0, 8) + '...' : topic.name,
-      A: Math.floor(Math.random() * 40) + 60 // Generate random coverage between 60-100
+      A: getTopicStatus(index) ? 100 : 0
     })) || [];
 
   // Calculate remaining time for exam
@@ -115,10 +124,8 @@ const Dashboard = () => {
   const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
 
-  // Calculate overall progress
-  const completedTopics = studyPlan?.topics.filter((_, index) => getTopicStatus(index)).length || 0;
-  const totalTopics = studyPlan?.topics.length || 1;
-  const progressPercentage = Math.round((completedTopics / totalTopics) * 100);
+  // Calculate overall progress percentage
+  const progressPercentage = Math.round((completedTopicsCount / nonBreakTopicsCount) * 100);
 
   return (
     <div>
@@ -130,7 +137,7 @@ const Dashboard = () => {
           <div>
             <h3 className="text-lg font-semibold mb-1">STUDY PROGRESS SUMMARY</h3>
             <p className="text-muted-foreground">
-              You've completed {completedTopics} of {totalTopics} topics ({progressPercentage}% complete)
+              You've completed {completedTopicsCount} of {nonBreakTopicsCount} topics ({progressPercentage}% complete)
             </p>
           </div>
           <div className="flex items-center gap-2">

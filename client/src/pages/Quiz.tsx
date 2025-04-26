@@ -93,12 +93,36 @@ const Quiz = () => {
     setScore(correctAnswers);
     setShowResults(true);
     
-    // Save quiz result to backend
-    // This would be implemented with an API call to store results
-    toast({
-      title: "Quiz Submitted",
-      description: `You scored ${correctAnswers} out of ${quizQuestions.length}`,
-    });
+    // Save quiz result to local storage to persist between sessions
+    try {
+      // Get existing results or initialize empty array
+      const savedResults = localStorage.getItem('quizResults');
+      const quizResults = savedResults ? JSON.parse(savedResults) : [];
+      
+      // Add new result
+      quizResults.push({
+        id: Date.now(),
+        topic: topic,
+        difficulty: difficulty,
+        score: correctAnswers,
+        totalQuestions: quizQuestions.length,
+        timestamp: new Date().toISOString(),
+      });
+      
+      // Save back to local storage
+      localStorage.setItem('quizResults', JSON.stringify(quizResults));
+      
+      toast({
+        title: "Quiz Submitted",
+        description: `You scored ${correctAnswers} out of ${quizQuestions.length}. Results saved.`,
+      });
+    } catch (error) {
+      console.error("Error saving quiz results:", error);
+      toast({
+        title: "Quiz Submitted",
+        description: `You scored ${correctAnswers} out of ${quizQuestions.length}`,
+      });
+    }
   };
 
   const alphaOptions = ['A', 'B', 'C', 'D', 'E'];
