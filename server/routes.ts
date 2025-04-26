@@ -5,10 +5,11 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 
 // Initialize Gemini API
-const genAI = new GoogleGenerativeAI(
-  process.env.GEMINI_API_KEY || "AIzaSyDl5d4OUH9EzQG_HBaHq0XYKCkYz-sXcQc"
-);
-const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+
+// Get the generative model
+// The error message indicates we need to use the correct model name and API version
+const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes

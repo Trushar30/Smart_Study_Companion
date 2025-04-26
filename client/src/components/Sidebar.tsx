@@ -1,20 +1,27 @@
 import { useLocation, Link } from "wouter";
 import { cn } from "@/lib/utils";
 import ThemeToggle from "./ThemeToggle";
+import { 
+  BarChart2, 
+  FileText, 
+  Lightbulb, 
+  HelpCircle, 
+  Calendar 
+} from "lucide-react";
 
 const menuItems = [
-  { name: "Dashboard", path: "/", icon: "fa-chart-line" },
-  { name: "Notes Generator", path: "/notes", icon: "fa-pencil-alt" },
+  { name: "Dashboard", path: "/", icon: <BarChart2 className="w-5 h-5" /> },
+  { name: "Notes Generator", path: "/notes", icon: <FileText className="w-5 h-5" /> },
   { 
     name: "Real-World Explanations", 
     path: "/explanations", 
-    icon: "fa-lightbulb" 
+    icon: <Lightbulb className="w-5 h-5" /> 
   },
-  { name: "Quiz", path: "/quiz", icon: "fa-question-circle" },
+  { name: "Quiz", path: "/quiz", icon: <HelpCircle className="w-5 h-5" /> },
   { 
     name: "Study Plan Generator", 
     path: "/study-plan-generator", 
-    icon: "fa-calendar-alt" 
+    icon: <Calendar className="w-5 h-5" /> 
   },
 ];
 
@@ -47,7 +54,9 @@ const Sidebar = () => {
               )}
             >
               <div className="flex items-center">
-                <i className={`fas ${item.icon} w-5 mr-2`}></i>
+                <div className="w-5 mr-2 flex-shrink-0">
+                  {item.icon}
+                </div>
                 <span>{item.name}</span>
               </div>
             </Link>

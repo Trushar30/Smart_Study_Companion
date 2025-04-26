@@ -121,3 +121,8 @@
 .study-pending {
   @apply w-5 h-5 rounded border-2 border-primary;
 }
+
+/* Sidebar styles */
+.bg-sidebar {
+  @apply bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700;
+}
