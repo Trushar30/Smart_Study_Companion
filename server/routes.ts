@@ -5,16 +5,43 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { z } from "zod";
 
 // Initialize Gemini API
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || "");
+const apiKey = process.env.GEMINI_API_KEY || "";
+if (!apiKey) {
+  console.error("Warning: GEMINI_API_KEY environment variable is not set");
+}
+
+const genAI = new GoogleGenerativeAI(apiKey);
 
 // Get the generative model
-// The error message indicates we need to use the correct model name and API version
-const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+// Try different model names if one fails
+// Define the model type to avoid TypeScript errors
+let model: any = null;
+try {
+  // First try the most recent model
+  model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+  console.log("Using Gemini 1.5 Pro model");
+} catch (error) {
+  console.error("Failed to initialize gemini-1.5-pro, falling back to gemini-pro:", error);
+  try {
+    // Fall back to the previous version
+    model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    console.log("Using Gemini Pro model");
+  } catch (fallbackError) {
+    console.error("Failed to initialize gemini-pro as well:", fallbackError);
+    // Continue with a null model, will handle errors at the API level
+    model = null;
+  }
+}
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
   app.post("/api/generate-study-plan", async (req: Request, res: Response) => {
     try {
+      // Check if model is initialized
+      if (!model) {
+        throw new Error("Gemini API model is not available. Please check your API key and try again later.");
+      }
+      
       const schema = z.object({
         subject: z.string().min(1),
         topics: z.string().min(1),
@@ -52,35 +79,48 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       Make sure the response is valid JSON that can be parsed in JavaScript.`;
 
-      const result = await model.generateContent(prompt);
-      const textResult = result.response.text();
-      
-      // Extract JSON from the response
-      const jsonMatch = textResult.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error("Failed to generate valid study plan");
-      }
-      
       try {
-        const studyPlan = JSON.parse(jsonMatch[0]);
+        const result = await model.generateContent(prompt);
+        const textResult = result.response.text();
         
-        // Generate a unique ID
-        studyPlan.id = `sp-${Date.now()}`;
+        // Extract JSON from the response
+        const jsonMatch = textResult.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error("Failed to generate valid study plan");
+        }
         
-        // Return the study plan
-        res.json(studyPlan);
-      } catch (error) {
-        console.error("Failed to parse JSON:", error);
-        throw new Error("Failed to parse generated study plan");
+        try {
+          const studyPlan = JSON.parse(jsonMatch[0]);
+          
+          // Generate a unique ID
+          studyPlan.id = `sp-${Date.now()}`;
+          
+          // Return the study plan
+          res.json(studyPlan);
+        } catch (parseError: any) {
+          console.error("Failed to parse JSON:", parseError);
+          throw new Error("Failed to parse generated study plan");
+        }
+      } catch (aiError: any) {
+        console.error("AI Generation error:", aiError);
+        throw new Error(`AI failed to generate content: ${aiError.message}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Study plan generation error:", error);
-      res.status(500).json({ message: "Failed to generate study plan" });
+      res.status(500).json({ 
+        message: "Failed to generate study plan", 
+        error: error.message 
+      });
     }
   });
 
   app.post("/api/generate-notes", async (req: Request, res: Response) => {
     try {
+      // Check if model is initialized
+      if (!model) {
+        throw new Error("Gemini API model is not available. Please check your API key and try again later.");
+      }
+      
       const schema = z.object({
         topic: z.string().min(1),
         detailLevel: z.string().min(1),
@@ -95,18 +135,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       Include key concepts, definitions, and examples where appropriate.
       Format your response in markdown.`;
 
-      const result = await model.generateContent(prompt);
-      const content = result.response.text();
-      
-      res.json({ content });
-    } catch (error) {
+      try {
+        const result = await model.generateContent(prompt);
+        const content = result.response.text();
+        
+        res.json({ content });
+      } catch (aiError: any) {
+        console.error("AI Generation error:", aiError);
+        throw new Error(`AI failed to generate content: ${aiError.message}`);
+      }
+    } catch (error: any) {
       console.error("Notes generation error:", error);
-      res.status(500).json({ message: "Failed to generate notes" });
+      res.status(500).json({ 
+        message: "Failed to generate notes",
+        error: error.message
+      });
     }
   });
 
   app.post("/api/generate-explanation", async (req: Request, res: Response) => {
     try {
+      // Check if model is initialized
+      if (!model) {
+        throw new Error("Gemini API model is not available. Please check your API key and try again later.");
+      }
+      
       const schema = z.object({
         topic: z.string().min(1),
       });
@@ -119,18 +172,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
       Start with the basics and then gradually move to more complex aspects. 
       Format your response in markdown with appropriate headings, bullet points, and emphasis.`;
 
-      const result = await model.generateContent(prompt);
-      const content = result.response.text();
-      
-      res.json({ content });
-    } catch (error) {
+      try {
+        const result = await model.generateContent(prompt);
+        const content = result.response.text();
+        
+        res.json({ content });
+      } catch (aiError: any) {
+        console.error("AI Generation error:", aiError);
+        throw new Error(`AI failed to generate content: ${aiError.message}`);
+      }
+    } catch (error: any) {
       console.error("Explanation generation error:", error);
-      res.status(500).json({ message: "Failed to generate explanation" });
+      res.status(500).json({ 
+        message: "Failed to generate explanation",
+        error: error.message
+      });
     }
   });
 
   app.post("/api/generate-quiz", async (req: Request, res: Response) => {
     try {
+      // Check if model is initialized
+      if (!model) {
+        throw new Error("Gemini API model is not available. Please check your API key and try again later.");
+      }
+      
       const schema = z.object({
         topic: z.string().min(1),
         difficulty: z.string().min(1),
@@ -159,25 +225,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
       
       Make sure the response is valid JSON that can be parsed in JavaScript.`;
 
-      const result = await model.generateContent(prompt);
-      const textResult = result.response.text();
-      
-      // Extract JSON from the response
-      const jsonMatch = textResult.match(/\{[\s\S]*\}/);
-      if (!jsonMatch) {
-        throw new Error("Failed to generate valid quiz");
-      }
-      
       try {
-        const quiz = JSON.parse(jsonMatch[0]);
-        res.json(quiz);
-      } catch (error) {
-        console.error("Failed to parse JSON:", error);
-        throw new Error("Failed to parse generated quiz");
+        const result = await model.generateContent(prompt);
+        const textResult = result.response.text();
+        
+        // Extract JSON from the response
+        const jsonMatch = textResult.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) {
+          throw new Error("Failed to generate valid quiz");
+        }
+        
+        try {
+          const quiz = JSON.parse(jsonMatch[0]);
+          res.json(quiz);
+        } catch (parseError: any) {
+          console.error("Failed to parse JSON:", parseError);
+          throw new Error("Failed to parse generated quiz");
+        }
+      } catch (aiError: any) {
+        console.error("AI Generation error:", aiError);
+        throw new Error(`AI failed to generate content: ${aiError.message}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error("Quiz generation error:", error);
-      res.status(500).json({ message: "Failed to generate quiz" });
+      res.status(500).json({ 
+        message: "Failed to generate quiz",
+        error: error.message
+      });
     }
   });
 
