@@ -458,7 +458,7 @@ const Dashboard = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                     </svg>
                   </div>
-                  <div className="flex justify-between items-center w-full">
+                  <div className="flex justify-between items-center w-full pl-3">
                     <div className="mr-4">
                       <h4 className="font-medium text-muted-foreground">Break</h4>
                     </div>
@@ -477,7 +477,7 @@ const Dashboard = () => {
                   <div className="timeline-dot flex items-center justify-center">
                     <span className="text-xs text-white font-medium">{index + 1}</span>
                   </div>
-                  <div className="flex justify-between items-center w-full">
+                  <div className="flex justify-between items-center w-full pl-3">
                     <div className="mr-4 max-w-[70%] truncate">
                       <h4 className="font-medium text-primary">{topic.name}</h4>
                     </div>

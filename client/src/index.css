@@ -90,7 +90,7 @@
 }
 
 .timeline-dot {
-  @apply absolute left-2.5 -translate-x-1/2 w-6 h-6 flex items-center justify-center rounded-full bg-primary text-white text-sm font-bold shadow-sm;
+  @apply absolute left-5 -translate-x-1/2 w-7 h-7 flex items-center justify-center rounded-full bg-primary text-white text-sm font-bold shadow-sm;
 }
 
 .countdown-box {
