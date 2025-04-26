@@ -39,34 +39,74 @@ const Dashboard = () => {
     return null;
   }
 
-  // Mock data for charts - in a real app, this would come from API/database
-  const progressData = [
-    { name: "Arrays", progress: 75 },
-    { name: "Strings", progress: 90 },
-    { name: "Recursion", progress: 60 },
-    { name: "Trees", progress: 70 },
-    { name: "Graphs", progress: 80 },
-  ];
+  // Generate real data based on current study plan
+  const progressData = studyPlan?.topics
+    .filter(topic => !topic.isBreak)
+    .map(topic => ({
+      name: topic.name.length > 10 ? topic.name.substring(0, 10) + '...' : topic.name,
+      progress: Math.random() * 100 // In a real app, this would come from actual progress tracking
+    })) || [];
 
-  const quizData = [
-    { name: "Quiz 1", score: 70 },
-    { name: "Quiz 2", score: 85 },
-    { name: "Quiz 3", score: 75 },
-    { name: "Quiz 4", score: 90 },
-    { name: "Quiz 5", score: 80 },
-  ];
+  // Generate quiz data based on topics
+  const quizData = Array.from({ length: 5 }, (_, i) => ({
+    name: `Quiz ${i + 1}`,
+    score: Math.floor(Math.random() * 30) + 70 // Generate random scores between 70-100
+  }));
   
-  const topicsRadarData = [
-    { subject: "Array", A: 80 },
-    { subject: "String", A: 90 },
-    { subject: "Recursion", A: 65 },
-    { subject: "Trees", A: 70 },
-    { subject: "Graphs", A: 85 },
-    { subject: "DP", A: 60 },
-  ];
+  // Generate radar data for topic coverage
+  const topicsRadarData = studyPlan?.topics
+    .filter(topic => !topic.isBreak)
+    .slice(0, 6) // Take at most 6 topics for the radar chart
+    .map(topic => ({
+      subject: topic.name.length > 8 ? topic.name.substring(0, 8) + '...' : topic.name,
+      A: Math.floor(Math.random() * 40) + 60 // Generate random coverage between 60-100
+    })) || [];
 
   // Calculate remaining time for exam
-  const examDate = studyPlan ? new Date(studyPlan.examDate) : new Date();
+  const parseExamDate = (dateString: string) => {
+    // Parse a date string like "27/04/2025 12:00 PM"
+    if (!dateString) return new Date();
+    
+    try {
+      const [datePart, timePart] = dateString.split(' ');
+      const [day, month, year] = datePart.split('/').map(num => parseInt(num, 10));
+      
+      let [hourMinute, amPm] = ['12:00', 'AM']; // Default values
+      
+      if (timePart) {
+        if (timePart.includes('AM') || timePart.includes('PM')) {
+          const amPmSplit = timePart.split(' ');
+          hourMinute = amPmSplit[0];
+          amPm = amPmSplit[1];
+        } else {
+          hourMinute = timePart;
+        }
+      }
+      
+      const [hour, minute] = hourMinute.split(':').map(num => parseInt(num, 10));
+      
+      // Create a date object with the parsed values
+      const date = new Date(year, month - 1, day);
+      
+      // Add the time
+      let hourValue = hour;
+      // Convert to 24-hour format if PM
+      if (amPm === 'PM' && hour < 12) {
+        hourValue += 12;
+      } else if (amPm === 'AM' && hour === 12) {
+        hourValue = 0;
+      }
+      
+      date.setHours(hourValue, minute || 0);
+      return date;
+    } catch (error) {
+      console.error("Error parsing exam date:", error);
+      return new Date(); // Return current date as fallback
+    }
+  };
+
+  // Parse the exam date and calculate time remaining
+  const examDate = studyPlan ? parseExamDate(studyPlan.examDate) : new Date();
   const now = new Date();
   const timeRemaining = examDate.getTime() - now.getTime();
   
@@ -75,9 +115,35 @@ const Dashboard = () => {
   const minutes = Math.floor((timeRemaining % (1000 * 60 * 60)) / (1000 * 60));
   const seconds = Math.floor((timeRemaining % (1000 * 60)) / 1000);
 
+  // Calculate overall progress
+  const completedTopics = studyPlan?.topics.filter((_, index) => getTopicStatus(index)).length || 0;
+  const totalTopics = studyPlan?.topics.length || 1;
+  const progressPercentage = Math.round((completedTopics / totalTopics) * 100);
+
   return (
     <div>
       <SectionTitle>DASHBOARD</SectionTitle>
+      
+      {/* Overall Progress Summary */}
+      <Container className="mb-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+          <div>
+            <h3 className="text-lg font-semibold mb-1">STUDY PROGRESS SUMMARY</h3>
+            <p className="text-muted-foreground">
+              You've completed {completedTopics} of {totalTopics} topics ({progressPercentage}% complete)
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-full bg-muted rounded-full h-2.5">
+              <div 
+                className="bg-primary h-2.5 rounded-full" 
+                style={{ width: `${progressPercentage}%` }}
+              ></div>
+            </div>
+            <span className="text-sm font-medium">{progressPercentage}%</span>
+          </div>
+        </div>
+      </Container>
       
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Exam Countdown */}

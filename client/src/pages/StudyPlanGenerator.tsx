@@ -53,7 +53,7 @@ const StudyPlanGenerator = () => {
         title: "Study plan generated",
         description: "Your study plan has been successfully generated!",
       });
-      navigate("/");
+      navigate("/study-plan");
     } catch (error) {
       toast({
         title: "Error generating study plan",
