@@ -364,15 +364,36 @@ const Dashboard = () => {
           <h3 className="text-lg font-semibold mb-4">QUIZ</h3>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={quizData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
+              <LineChart data={quizData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                <XAxis 
+                  dataKey="name" 
+                  tick={{ fill: 'hsl(var(--foreground))', fontSize: 10 }}
+                  axisLine={{ stroke: 'hsl(var(--muted))' }}
+                />
+                <YAxis 
+                  domain={[0, 100]}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                  axisLine={{ stroke: 'hsl(var(--muted))' }}
+                />
+                <Tooltip
+                  formatter={(value: any) => [`${value}%`, 'Score']}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '4px',
+                    color: 'hsl(var(--foreground))',
+                  }}
+                />
+                <Legend />
                 <Line 
                   type="monotone" 
                   dataKey="score" 
+                  name="Quiz Score"
                   stroke="hsl(var(--primary))" 
-                  strokeWidth={2} 
+                  strokeWidth={2}
+                  dot={{ fill: 'hsl(var(--primary))', r: 4 }}
+                  activeDot={{ r: 6, fill: 'hsl(var(--primary))' }}
                 />
               </LineChart>
             </ResponsiveContainer>
