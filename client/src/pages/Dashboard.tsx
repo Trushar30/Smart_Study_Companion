@@ -51,25 +51,93 @@ const Dashboard = () => {
       target: 100
     })) || [];
 
-  // Create quiz data based on completed topics (only show data if we have actual completed topics)
-  const quizData = completedTopicsCount > 0 
-    ? studyPlan?.topics
-        .filter((topic, index) => !topic.isBreak && getTopicStatus(index))
-        .slice(0, 5)
-        .map((topic, i) => ({
-          name: `Topic ${i + 1}`,
-          score: 100 // Complete score for completed topics
-        }))
-    : [];
+  // Load real quiz data from localStorage
+  const loadQuizData = () => {
+    try {
+      const savedResults = localStorage.getItem('quizResults');
+      if (savedResults) {
+        const results = JSON.parse(savedResults);
+        // Get the 5 most recent quiz results
+        return results
+          .slice(-5)
+          .map((result: any, index: number) => ({
+            name: `Quiz ${index + 1}`,
+            score: Math.round((result.score / result.totalQuestions) * 100)
+          }));
+      }
+    } catch (error) {
+      console.error("Error loading quiz results:", error);
+    }
+    
+    // If no quiz data found or error, use completed topics as a fallback
+    return completedTopicsCount > 0 
+      ? studyPlan?.topics
+          .filter((topic, index) => !topic.isBreak && getTopicStatus(index))
+          .slice(0, 5)
+          .map((topic, i) => ({
+            name: `Topic ${i + 1}`,
+            score: 100 // Complete score for completed topics
+          }))
+      : [];
+  };
   
-  // Create radar data based on actual topic completion
-  const topicsRadarData = studyPlan?.topics
-    .filter(topic => !topic.isBreak)
-    .slice(0, 6) // Take at most 6 topics for the radar chart
-    .map((topic, index) => ({
-      subject: topic.name.length > 8 ? topic.name.substring(0, 8) + '...' : topic.name,
-      A: getTopicStatus(index) ? 100 : 0
-    })) || [];
+  const quizData = loadQuizData();
+  
+  // Load notes and explanations from localStorage to create a comprehensive radar chart
+  const loadTopicsRadarData = () => {
+    try {
+      // Get study plan topics first
+      const planTopics = studyPlan?.topics
+        .filter(topic => !topic.isBreak)
+        .slice(0, 3) // Take up to 3 topics from study plan
+        .map((topic, index) => ({
+          subject: topic.name.length > 8 ? topic.name.substring(0, 8) + '...' : topic.name,
+          A: getTopicStatus(index) ? 100 : 0
+        })) || [];
+      
+      // Get notes topics (if any)
+      const savedNotes = localStorage.getItem('generatedNotes');
+      let notesTopics: any[] = [];
+      if (savedNotes) {
+        const notes = JSON.parse(savedNotes);
+        notesTopics = notes
+          .slice(-2) // Get 2 most recent notes
+          .map((note: any) => ({
+            subject: note.topic.length > 8 ? note.topic.substring(0, 8) + '...' : note.topic,
+            A: 80 // Notes contribute 80% to topic coverage
+          }));
+      }
+      
+      // Get explanations topics (if any)
+      const savedExplanations = localStorage.getItem('realWorldExplanations');
+      let explanationTopics: any[] = [];
+      if (savedExplanations) {
+        const explanations = JSON.parse(savedExplanations);
+        explanationTopics = explanations
+          .slice(-1) // Get 1 most recent explanation
+          .map((exp: any) => ({
+            subject: exp.topic.length > 8 ? exp.topic.substring(0, 8) + '...' : exp.topic,
+            A: 90 // Explanations contribute 90% to topic coverage
+          }));
+      }
+      
+      // Combine all topics
+      return [...planTopics, ...notesTopics, ...explanationTopics];
+    } catch (error) {
+      console.error("Error loading topic radar data:", error);
+      
+      // Fallback to study plan topics only
+      return studyPlan?.topics
+        .filter(topic => !topic.isBreak)
+        .slice(0, 6)
+        .map((topic, index) => ({
+          subject: topic.name.length > 8 ? topic.name.substring(0, 8) + '...' : topic.name,
+          A: getTopicStatus(index) ? 100 : 0
+        })) || [];
+    }
+  };
+  
+  const topicsRadarData = loadTopicsRadarData();
 
   // Calculate remaining time for exam
   const parseExamDate = (dateString: string) => {

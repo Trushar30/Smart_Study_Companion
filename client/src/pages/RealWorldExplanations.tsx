@@ -47,14 +47,50 @@ const RealWorldExplanations = () => {
 
   const handleDownload = () => {
     if (!explanation) return;
-
-    const element = document.createElement("a");
-    const file = new Blob([explanation], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = `${topic}_explanation.md`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    
+    // Save explanation to local storage before downloading
+    try {
+      // Get existing explanations or initialize empty array
+      const savedExplanations = localStorage.getItem('realWorldExplanations');
+      const explanationsArray = savedExplanations ? JSON.parse(savedExplanations) : [];
+      
+      // Add new explanation
+      explanationsArray.push({
+        id: `exp-${Date.now()}`,
+        topic: topic,
+        content: explanation,
+        createdAt: new Date().toISOString()
+      });
+      
+      // Save back to local storage
+      localStorage.setItem('realWorldExplanations', JSON.stringify(explanationsArray));
+      
+      // Create download
+      const element = document.createElement("a");
+      const file = new Blob([explanation], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = `${topic}_explanation.md`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
+      // Show success message
+      toast({
+        title: "Explanation saved",
+        description: "Explanation has been saved to your history and downloaded"
+      });
+    } catch (error) {
+      console.error("Error saving explanation:", error);
+      
+      // Just download if saving fails
+      const element = document.createElement("a");
+      const file = new Blob([explanation], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = `${topic}_explanation.md`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
   };
 
   return (

@@ -50,14 +50,52 @@ const NotesGenerator = () => {
 
   const handleDownload = () => {
     if (!notesContent) return;
-
-    const element = document.createElement("a");
-    const file = new Blob([notesContent], { type: "text/plain" });
-    element.href = URL.createObjectURL(file);
-    element.download = `${topic}_notes.md`;
-    document.body.appendChild(element);
-    element.click();
-    document.body.removeChild(element);
+    
+    // Save note to local storage before downloading
+    try {
+      // Get existing notes or initialize empty array
+      const savedNotes = localStorage.getItem('generatedNotes');
+      const notesArray = savedNotes ? JSON.parse(savedNotes) : [];
+      
+      // Add new note
+      notesArray.push({
+        id: `note-${Date.now()}`,
+        topic: topic,
+        detailLevel: detailLevel,
+        format: format,
+        content: notesContent,
+        createdAt: new Date().toISOString()
+      });
+      
+      // Save back to local storage
+      localStorage.setItem('generatedNotes', JSON.stringify(notesArray));
+      
+      // Create download
+      const element = document.createElement("a");
+      const file = new Blob([notesContent], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = `${topic}_notes.md`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+      
+      // Show success message
+      toast({
+        title: "Notes saved",
+        description: "Notes have been saved to your history and downloaded"
+      });
+    } catch (error) {
+      console.error("Error saving notes:", error);
+      
+      // Just download if saving fails
+      const element = document.createElement("a");
+      const file = new Blob([notesContent], { type: "text/plain" });
+      element.href = URL.createObjectURL(file);
+      element.download = `${topic}_notes.md`;
+      document.body.appendChild(element);
+      element.click();
+      document.body.removeChild(element);
+    }
   };
 
   return (
