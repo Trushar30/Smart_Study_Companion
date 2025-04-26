@@ -22,6 +22,8 @@ import {
   PolarGrid,
   PolarAngleAxis,
   PolarRadiusAxis,
+  Tooltip,
+  Legend,
 } from "recharts";
 
 const Dashboard = () => {
@@ -285,25 +287,31 @@ const Dashboard = () => {
           <p className="text-muted-foreground mb-2">SUBJECT:</p>
           <p className="font-medium mb-4">{studyPlan?.subject.toUpperCase()}</p>
           <p className="text-muted-foreground mb-2">TIME REMAINING:</p>
-          <div className="flex space-x-3 mt-2">
-            <div className="countdown-box">
-              <span className="text-xl font-bold">{countdownDays < 10 ? `0${countdownDays}` : countdownDays}</span>
+          <div className="flex justify-between items-center mt-2">
+            <div className="flex flex-col items-center">
+              <div className="countdown-box mb-1">
+                <span className="text-xl font-bold">{countdownDays < 10 ? `0${countdownDays}` : countdownDays}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">DAYS</span>
             </div>
-            <div className="countdown-box">
-              <span className="text-xl font-bold">{countdownHours < 10 ? `0${countdownHours}` : countdownHours}</span>
+            <div className="flex flex-col items-center">
+              <div className="countdown-box mb-1">
+                <span className="text-xl font-bold">{countdownHours < 10 ? `0${countdownHours}` : countdownHours}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">HOURS</span>
             </div>
-            <div className="countdown-box">
-              <span className="text-xl font-bold">{countdownMinutes < 10 ? `0${countdownMinutes}` : countdownMinutes}</span>
+            <div className="flex flex-col items-center">
+              <div className="countdown-box mb-1">
+                <span className="text-xl font-bold">{countdownMinutes < 10 ? `0${countdownMinutes}` : countdownMinutes}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">MINS</span>
             </div>
-            <div className="countdown-box">
-              <span className="text-xl font-bold">{countdownSeconds < 10 ? `0${countdownSeconds}` : countdownSeconds}</span>
+            <div className="flex flex-col items-center">
+              <div className="countdown-box mb-1">
+                <span className="text-xl font-bold">{countdownSeconds < 10 ? `0${countdownSeconds}` : countdownSeconds}</span>
+              </div>
+              <span className="text-xs text-muted-foreground">SECS</span>
             </div>
-          </div>
-          <div className="flex justify-between text-muted-foreground text-sm mt-1">
-            <span>DAYS</span>
-            <span>HOURS</span>
-            <span>MINS</span>
-            <span>SECS</span>
           </div>
         </Container>
         
@@ -312,12 +320,40 @@ const Dashboard = () => {
           <h3 className="text-lg font-semibold mb-4">PROGRESS</h3>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={progressData}>
-                <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
-                <YAxis />
-                <Bar dataKey="progress" fill="hsl(var(--chart-2))" />
-                <Bar dataKey="target" fill="hsl(var(--chart-1))" />
+              <BarChart data={progressData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--muted))" />
+                <XAxis 
+                  dataKey="name" 
+                  tick={{ fill: 'hsl(var(--foreground))', fontSize: 10 }}
+                  axisLine={{ stroke: 'hsl(var(--muted))' }}
+                />
+                <YAxis 
+                  domain={[0, 100]}
+                  tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 10 }}
+                  axisLine={{ stroke: 'hsl(var(--muted))' }}
+                />
+                <Tooltip
+                  formatter={(value: any) => [`${value}%`, '']}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '4px',
+                    color: 'hsl(var(--foreground))',
+                  }}
+                />
+                <Legend />
+                <Bar 
+                  dataKey="progress" 
+                  name="Completed" 
+                  fill="hsl(var(--chart-2))" 
+                  radius={[4, 4, 0, 0]} 
+                />
+                <Bar 
+                  dataKey="target" 
+                  name="Target" 
+                  fill="hsl(var(--chart-1))" 
+                  radius={[4, 4, 0, 0]} 
+                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -348,16 +384,34 @@ const Dashboard = () => {
           <h3 className="text-lg font-semibold mb-4">TOPICS</h3>
           <div className="h-48">
             <ResponsiveContainer width="100%" height="100%">
-              <RadarChart outerRadius={90} data={topicsRadarData}>
-                <PolarGrid />
-                <PolarAngleAxis dataKey="subject" />
-                <PolarRadiusAxis />
+              <RadarChart outerRadius={80} cx="50%" cy="50%" data={topicsRadarData}>
+                <PolarGrid stroke="hsl(var(--muted-foreground))" />
+                <PolarAngleAxis 
+                  dataKey="subject" 
+                  tick={{ fill: 'hsl(var(--foreground))', fontSize: 10 }}
+                  axisLine={{ stroke: 'hsl(var(--muted))' }}
+                />
+                <PolarRadiusAxis 
+                  angle={30} 
+                  domain={[0, 100]} 
+                  axisLine={{ stroke: 'hsl(var(--muted))' }}
+                  tick={{ fill: 'hsl(var(--muted-foreground))' }}
+                />
                 <Radar
                   name="Coverage"
                   dataKey="A"
                   stroke="hsl(var(--primary))"
                   fill="hsl(var(--primary))"
-                  fillOpacity={0.2}
+                  fillOpacity={0.4}
+                />
+                <Tooltip 
+                  formatter={(value: any) => [`${value}%`, 'Coverage']}
+                  contentStyle={{
+                    backgroundColor: 'hsl(var(--card))',
+                    border: '1px solid hsl(var(--border))',
+                    borderRadius: '4px',
+                    color: 'hsl(var(--foreground))',
+                  }}
                 />
               </RadarChart>
             </ResponsiveContainer>
@@ -383,13 +437,15 @@ const Dashboard = () => {
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" />
                     </svg>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium text-muted-foreground">Break</h4>
-                    <div className="flex items-center space-x-4">
+                  <div className="flex justify-between items-center w-full">
+                    <div className="mr-4">
+                      <h4 className="font-medium text-muted-foreground">Break</h4>
+                    </div>
+                    <div className="flex items-center space-x-4 min-w-[120px] justify-end">
                       <span className="text-sm text-muted-foreground min-w-[80px] text-right">
                         {topic.duration} minutes
                       </span>
-                      <div className={`${getTopicStatus(index) ? "study-done" : "study-pending"} w-6 h-6 flex items-center justify-center rounded-sm`}>
+                      <div className={`${getTopicStatus(index) ? "study-done" : "study-pending"} w-6 h-6 flex items-center justify-center rounded-sm min-w-[24px]`}>
                         {getTopicStatus(index) && <Check className="h-3 w-3" />}
                       </div>
                     </div>
@@ -400,16 +456,18 @@ const Dashboard = () => {
                   <div className="timeline-dot flex items-center justify-center">
                     <span className="text-xs text-white font-medium">{index + 1}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium text-primary mr-4 max-w-[60%]">{topic.name}</h4>
-                    <div className="flex items-center space-x-4">
+                  <div className="flex justify-between items-center w-full">
+                    <div className="mr-4 max-w-[70%] truncate">
+                      <h4 className="font-medium text-primary">{topic.name}</h4>
+                    </div>
+                    <div className="flex items-center space-x-4 min-w-[120px] justify-end">
                       <span className="text-sm text-muted-foreground min-w-[80px] text-right">
                         {topic.duration} minutes
                       </span>
                       <Button 
                         variant="outline" 
                         size="icon"
-                        className={`${getTopicStatus(index) ? "study-done" : "study-pending"} w-6 h-6 p-0 flex items-center justify-center rounded-sm`}
+                        className={`${getTopicStatus(index) ? "study-done" : "study-pending"} w-6 h-6 p-0 flex items-center justify-center rounded-sm min-w-[24px]`}
                         onClick={() => markTopicCompleted(index)}
                       >
                         {getTopicStatus(index) && <Check className="h-3 w-3" />}
