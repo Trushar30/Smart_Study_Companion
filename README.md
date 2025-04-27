@@ -11,14 +11,6 @@ A personalized learning assistant that generates structured study plans and real
 - **TypeScript**: Type-safe codebase for better development
 - **Modern Stack**: React.js, Node.js, Express.js
 
-## Screenshots
-
-- Dashboard with progress tracking
-- Study plan generation
-- Notes creation with AI assistance
-- Interactive quizzes
-- Real-world explanations
-
 ## 🛠️ Tech Stack
 
 - **Frontend:** React, TypeScript, Tailwind CSS, Shadcn UI Components
