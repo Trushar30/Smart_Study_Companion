@@ -1,17 +1,15 @@
-# Smart Study Companion
+# Smart Study Companion 📚
 
-A web application that helps students prepare for exams using AI-generated study plans, notes, explanations, and quizzes with real-time progress tracking.
+A personalized learning assistant that generates structured study plans and real-life examples using Google's Gemini AI. This project helps students create effective study materials and understand complex topics through practical examples.
 
-## Features
+## 🌟 Features
 
-- Create personalized study plans with topics and duration
-- Generate detailed notes for specific topics with Gemini AI
-- Get real-world explanations of concepts
-- Take quizzes to test your knowledge
-- Track your progress through a comprehensive dashboard
-- Real-time countdown to exam date
-- Topic completion tracking
-- Theme toggle (light/dark mode)
+- **AI-Powered Study Plans**: Generate personalized learning paths using Gemini AI
+- **Real-World Examples**: Get practical examples for better understanding
+- **PDF Export**: Download study materials in well-formatted PDF
+- **Responsive UI**: Built with Tailwind CSS and Radix UI
+- **TypeScript**: Type-safe codebase for better development
+- **Modern Stack**: React.js, Node.js, Express.js
 
 ## Screenshots
 
@@ -21,7 +19,7 @@ A web application that helps students prepare for exams using AI-generated study
 - Interactive quizzes
 - Real-world explanations
 
-## Tech Stack
+## 🛠️ Tech Stack
 
 - **Frontend:** React, TypeScript, Tailwind CSS, Shadcn UI Components
 - **Backend:** Node.js, Express
@@ -33,34 +31,59 @@ A web application that helps students prepare for exams using AI-generated study
 
 ### Prerequisites
 
-- Node.js (v18 or later)
-- npm (v8 or later)
+- Node.js v18 or later
+- npm v8 or later
 - Google Gemini API key
 
-### Installation
+## 🚀 Installation
 
-1. Clone the repository
-   ```
-   git clone <repository-url>
-   cd smart-study-companion
-   ```
+1. **Clone the repository**
+```bash
+git clone https://github.com/Trushar30/Smart_Study_Companion.git
+cd Smart_Study_Companion
+```
 
-2. Install dependencies
-   ```
-   npm install
-   ```
+2. **Install dependencies**
+```bash
+npm install
+```
 
-3. Create a `.env` file in the root directory with your Gemini API key
-   ```
-   GEMINI_API_KEY=your_gemini_api_key_here
-   ```
+3. **Create environment file**
+Create a `.env` file in the root directory with the following content:
+```plaintext
+GEMINI_API_KEY=your_gemini_api_key_here
+PORT=3000
+NODE_ENV=development
+```
 
-4. Start the development server
-   ```
-   npm run dev
-   ```
+4. **Install required packages**
+```bash
+npm install dotenv pdfkit @types/pdfkit cross-env
+```
 
-5. Open your browser and navigate to `http://localhost:5000`
+## ⚙️ Configuration
+
+1. **Get Gemini API Key**
+- Visit [Google AI Studio](https://makersuite.google.com/app/apikey)
+- Create a new API key
+- Copy the key to your `.env` file
+
+2. **Update environment variables**
+- Make sure your `.env` file has all required variables
+- Double-check there are no spaces around the equal signs
+
+## 🏃‍♂️ Running the Project
+
+### Development Mode
+```bash
+npm run dev
+```
+
+### Production Mode
+```bash
+npm run build
+npm start
+```
 
 ## How to Use
 
@@ -88,27 +111,56 @@ A web application that helps students prepare for exams using AI-generated study
    - Mark topics as completed
    - Monitor quiz scores and topic coverage
 
-## Project Structure
+## 📁 Project Structure
 
-- `client/`: Frontend React application
-  - `src/components/`: UI components
-  - `src/pages/`: Application pages
-  - `src/hooks/`: Custom React hooks
-  - `src/lib/`: Utility functions and API clients
-  - `src/types/`: TypeScript type definitions
+```
+SmartStudyCompanion/
+├── client/
+│   ├── src/
+│   │   ├── components/
+│   │   ├── pages/
+│   │   └── main.tsx
+│   └── index.html
+├── server/
+│   ├── routes/
+│   ├── index.ts
+│   └── vite.ts
+├── .env
+├── package.json
+└── README.md
+```
 
-- `server/`: Backend Express server
-  - `routes.ts`: API routes for AI integration
-  - `storage.ts`: Data storage logic
+## 🔧 Troubleshooting
 
-## Contributing
+### Common Issues
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+1. **GEMINI_API_KEY not found**
+   - Check if `.env` file exists in root directory
+   - Verify API key is correct
+   - Restart the server
 
-## License
+2. **Port already in use**
+```bash
+# Windows
+netstat -ano | findstr :3000
+taskkill /PID <PID> /F
+```
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+3. **Build errors**
+```bash
+# Clear node modules and reinstall
+rm -rf node_modules
+npm install
+```
+
+## 👥 Authors
+
+- Trushar Patel - *Initial work* - [Trushar30](https://github.com/Trushar30)
+
+## 🙏 Acknowledgments
+
+- Google Gemini AI for providing the AI capabilities
+- OpenAI for inspiration
+- All contributors who helped with the project
+
+---

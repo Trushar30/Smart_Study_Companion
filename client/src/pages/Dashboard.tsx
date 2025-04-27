@@ -133,7 +133,6 @@ const Dashboard = () => {
     .map((topic, index) => ({
       name: topic.name.length > 10 ? topic.name.substring(0, 10) + '...' : topic.name,
       progress: getTopicStatus(index) ? 100 : 0,
-      target: 100
     })) || [];
 
   // Load real quiz data from localStorage, tracking progress per topic
@@ -202,7 +201,7 @@ const Dashboard = () => {
       // Get study plan topics first
       const planTopics = studyPlan?.topics
         .filter(topic => !topic.isBreak)
-        .slice(0, 3) // Take up to 3 topics from study plan
+        .slice(0, 5) // Take up to 3 topics from study plan
         .map((topic, index) => ({
           subject: topic.name.length > 8 ? topic.name.substring(0, 8) + '...' : topic.name,
           A: getTopicStatus(index) ? 100 : 0
@@ -230,7 +229,7 @@ const Dashboard = () => {
           .slice(-1) // Get 1 most recent explanation
           .map((exp: any) => ({
             subject: exp.topic.length > 8 ? exp.topic.substring(0, 8) + '...' : exp.topic,
-            A: 90 // Explanations contribute 90% to topic coverage
+            A: 90 //ute Explanations contrib 90% to topic coverage
           }));
       }
       
@@ -348,12 +347,6 @@ const Dashboard = () => {
                   fill="hsl(var(--chart-2))" 
                   radius={[4, 4, 0, 0]} 
                 />
-                <Bar 
-                  dataKey="target" 
-                  name="Target" 
-                  fill="hsl(var(--chart-1))" 
-                  radius={[4, 4, 0, 0]} 
-                />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -460,7 +453,7 @@ const Dashboard = () => {
                   </div>
                   <div className="flex justify-between items-center w-full pl-10">
                     <div className="mr-4">
-                      <h4 className="font-medium text-muted-foreground">Break</h4>
+                      <h4 className="font-medium text-muted-foreground">&ensp;&ensp;&ensp;Break</h4>
                     </div>
                     <div className="flex items-center space-x-4 min-w-[120px] justify-end">
                       <span className="text-sm text-muted-foreground min-w-[80px] text-right">
@@ -479,7 +472,7 @@ const Dashboard = () => {
                   </div>
                   <div className="flex justify-between items-center w-full pl-10">
                     <div className="mr-4 max-w-[65%] truncate">
-                      <h4 className="font-medium text-primary">{topic.name}</h4>
+                    <h4 className="font-medium text-primary"><span>&ensp;&ensp;&ensp;</span>{topic.name}</h4>
                     </div>
                     <div className="flex items-center space-x-4 min-w-[120px] justify-end">
                       <span className="text-sm text-muted-foreground min-w-[80px] text-right">

@@ -43,17 +43,17 @@ const StudyPlan = () => {
           {studyPlan?.topics.map((topic, index) => (
             <div 
               key={index} 
-              className="ml-12 pb-8 relative"
+              className="ml-16 pb-8 relative"
             >
               {topic.isBreak ? (
                 <>
-                  <div className="timeline-dot bg-gray-500">
+                  <div className="timeline-dot bg-gray-500 flex items-center justify-center">
                     <i className="fas fa-coffee text-xs"></i>
                   </div>
-                  <div className="flex justify-between items-center">
+                  <div className="flex justify-between items-center w-full pl-10">
                     <h4 className="font-medium text-muted-foreground">Break</h4>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-muted-foreground">
+                    <div className="flex items-center space-x-4 min-w-[120px] justify-end">
+                      <span className="text-sm text-muted-foreground min-w-[80px] text-right">
                         {topic.duration} minutes
                       </span>
                       <div className={getTopicStatus(index) ? "study-done" : "study-pending"}>
@@ -64,13 +64,13 @@ const StudyPlan = () => {
                 </>
               ) : (
                 <>
-                  <div className="timeline-dot">
-                    {index + 1}
+                  <div className="timeline-dot flex items-center justify-center">
+                    <span className="text-xs text-white font-medium">{index + 1}</span>
                   </div>
-                  <div className="flex justify-between items-center">
-                    <h4 className="font-medium text-primary">{topic.name}</h4>
-                    <div className="flex items-center space-x-4">
-                      <span className="text-sm text-muted-foreground">
+                  <div className="flex justify-between items-center w-full pl-10">
+                    <h4 className="font-medium text-primary"><span>&ensp;&ensp;</span>{topic.name}</h4>
+                    <div className="flex items-center space-x-4 min-w-[120px] justify-end">
+                      <span className="text-sm text-muted-foreground min-w-[80px] text-right">
                         {topic.duration} minutes
                       </span>
                       <Button 

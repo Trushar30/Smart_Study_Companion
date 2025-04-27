@@ -2,15 +2,28 @@ import type { Express, Request, Response } from "express";
 import { createServer, type Server } from "http";
 import { storage } from "./storage";
 import { GoogleGenerativeAI } from "@google/generative-ai";
-import { z } from "zod";
+import dotenv from 'dotenv';
+import path from 'path';
+import { z } from 'zod';
 
-// Initialize Gemini API
-const apiKey = process.env.GEMINI_API_KEY || "";
+// Load environment variables
+dotenv.config({
+  path: path.resolve(process.cwd(), '.env')
+});
+
+const apiKey = process.env.GEMINI_API_KEY;
 if (!apiKey) {
-  console.error("Warning: GEMINI_API_KEY environment variable is not set");
+  console.error('GEMINI_API_KEY not found in environment variables');
+  process.exit(1);
 }
 
+// Initialize Gemini API with validated key
 const genAI = new GoogleGenerativeAI(apiKey);
+
+// Validate API key before starting server
+if (!process.env.GEMINI_API_KEY) {
+  throw new Error('GEMINI_API_KEY environment variable is required');
+}
 
 // Get the generative model
 // Try different model names if one fails
@@ -37,10 +50,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // API routes
   app.post("/api/generate-study-plan", async (req: Request, res: Response) => {
     try {
-      // Check if model is initialized
-      if (!model) {
-        throw new Error("Gemini API model is not available. Please check your API key and try again later.");
-      }
+      const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
       
       const schema = z.object({
         subject: z.string().min(1),

@@ -119,9 +119,12 @@ export class MemStorage implements IStorage {
   async createStudyPlan(plan: InsertStudyPlan): Promise<StudyPlan> {
     const id = this.studyPlanCurrentId++;
     const studyPlan: StudyPlan = { 
-      ...plan, 
-      id, 
-      createdAt: new Date() 
+      id: id,
+      createdAt: new Date(),
+      subject: plan.subject,
+      topics: plan.topics,
+      examDate: plan.examDate,
+      userId: plan.userId || null // Ensure userId is either number or null
     };
     this.studyPlans.set(id, studyPlan);
     return studyPlan;
@@ -141,9 +144,13 @@ export class MemStorage implements IStorage {
   async createNote(note: InsertNote): Promise<Note> {
     const id = this.noteCurrentId++;
     const newNote: Note = { 
-      ...note, 
-      id, 
-      createdAt: new Date() 
+      id: id,
+      createdAt: new Date(),
+      content: note.content,
+      format: note.format,
+      topic: note.topic,
+      detailLevel: note.detailLevel,
+      userId: note.userId || null // Ensure userId is either number or null
     };
     this.notes.set(id, newNote);
     return newNote;
@@ -163,9 +170,11 @@ export class MemStorage implements IStorage {
   async createExplanation(explanation: InsertExplanation): Promise<Explanation> {
     const id = this.explanationCurrentId++;
     const newExplanation: Explanation = { 
-      ...explanation, 
-      id, 
-      createdAt: new Date() 
+      id: id,
+      createdAt: new Date(),
+      content: explanation.content,
+      topic: explanation.topic,
+      userId: explanation.userId || null // Ensure userId is either number or null
     };
     this.explanations.set(id, newExplanation);
     return newExplanation;
@@ -185,9 +194,13 @@ export class MemStorage implements IStorage {
   async createQuiz(quiz: InsertQuiz): Promise<Quiz> {
     const id = this.quizCurrentId++;
     const newQuiz: Quiz = { 
-      ...quiz, 
-      id, 
-      createdAt: new Date() 
+      id: id,
+      createdAt: new Date(),
+      topic: quiz.topic,
+      difficulty: quiz.difficulty,
+      questions: quiz.questions,
+      score: quiz.score || null, // Ensure score is either number or null
+      userId: quiz.userId || null // Ensure userId is either number or null
     };
     this.quizzes.set(id, newQuiz);
     return newQuiz;
@@ -216,9 +229,12 @@ export class MemStorage implements IStorage {
   async createProgress(progressData: InsertProgress): Promise<Progress> {
     const id = this.progressCurrentId++;
     const newProgress: Progress = { 
-      ...progressData, 
-      id, 
-      lastStudied: new Date() 
+      id: id,
+      lastStudied: new Date(),
+      topic: progressData.topic,
+      quizScores: progressData.quizScores,
+      completion: progressData.completion,
+      userId: progressData.userId || null // Ensure userId is either number or null
     };
     this.progressData.set(id, newProgress);
     return newProgress;
@@ -254,17 +270,24 @@ export class MemStorage implements IStorage {
     if (existingStatus) {
       const updatedStatus = { 
         ...existingStatus, 
-        completed: status.completed,
+        completed: status.completed ?? null,
         updatedAt: new Date()
       };
-      this.topicStatusData.set(existingStatus.id, updatedStatus);
+      this.topicStatusData.set(existingStatus.id, {
+        ...existingStatus,
+        completed: status.completed ?? null,
+        updatedAt: new Date()
+      });
       return updatedStatus;
     } else {
       const id = this.topicStatusCurrentId++;
       const newStatus: TopicStatus = { 
-        ...status, 
-        id, 
-        updatedAt: new Date() 
+        id: id,
+        updatedAt: new Date(),
+        topicIndex: status.topicIndex,
+        userId: status.userId || null,
+        studyPlanId: status.studyPlanId || null,
+        completed: status.completed || null
       };
       this.topicStatusData.set(id, newStatus);
       return newStatus;
